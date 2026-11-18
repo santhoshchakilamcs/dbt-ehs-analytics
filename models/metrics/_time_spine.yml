@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: metricflow_time_spine
+    description: "MetricFlow time spine, one row per day (2015-01-01 to 2025-12-31)."
+    config:
+      time_spine:
+        standard_granularity_column: date_day
+    columns:
+      - name: date_day
+        description: "Calendar date, day granularity."
+        data_type: date
+        tests:
+          - unique
+          - not_null

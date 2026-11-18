@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: stg_osha_sir
+    description: "Cleaned, typed, deduplicated OSHA Severe Injury Reports. One row per report."
+    columns:
+      - name: report_id
+        description: "OSHA report ID, deduplicated."
+        tests:
+          - unique
+          - not_null
+      - name: event_date
+        description: "Date of the incident."
+        tests:
+          - not_null
+      - name: employer_name
+        description: "Employer name as reported."
+        tests:
+          - not_null
+      - name: naics_code
+        description: "6-digit NAICS industry code. 2 rows in the full file are blank."
+      - name: people_hospitalized
+        description: "People hospitalized; null when the source field is blank. Non-negativity is enforced by the singular test assert_counts_nonnegative."
+      - name: is_federal
+        description: "True = federal OSHA jurisdiction, false = state-plan state."

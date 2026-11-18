@@ -1,0 +1,129 @@
+version: 2
+
+models:
+  - name: dim_employer
+    description: "SCD Type 2 employer dimension from the snapshot. One row per employer version; is_current marks the latest version."
+    columns:
+      - name: employer_key
+        description: "Surrogate key: md5(lower(employer name) | lower(city) | upper(state))."
+        tests:
+          - not_null
+      - name: naics_code
+        description: "6-digit NAICS code of the employer's latest incident."
+      - name: is_current
+        description: "True for the latest version of each employer."
+  - name: dim_date
+    description: "Calendar spine, 2015-01-01 to 2025-12-31."
+    columns:
+      - name: date_key
+        description: "YYYYMMDD integer key."
+        tests:
+          - unique
+          - not_null
+      - name: date_day
+        description: "Calendar date."
+        tests:
+          - unique
+          - not_null
+  - name: dim_event
+    description: "Incident event types (OIICS event codes and titles)."
+    columns:
+      - name: event_key
+        tests:
+          - unique
+          - not_null
+  - name: dim_nature
+    description: "Nature of injury (OIICS nature codes and titles)."
+    columns:
+      - name: nature_key
+        tests:
+          - unique
+          - not_null
+  - name: dim_source
+    description: "Source of injury (OIICS source codes and titles)."
+    columns:
+      - name: source_key
+        tests:
+          - unique
+          - not_null
+  - name: dim_body_part
+    description: "Part of body affected (OIICS codes and titles)."
+    columns:
+      - name: body_part_key
+        tests:
+          - unique
+          - not_null
+  - name: fact_incidents
+    description: "One row per OSHA severe injury report. Grain: report."
+    columns:
+      - name: incident_key
+        description: "Surrogate key: md5(report_id)."
+        tests:
+          - unique
+          - not_null
+      - name: report_id
+        tests:
+          - unique
+          - not_null
+      - name: employer_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_employer')
+                field: employer_key
+      - name: date_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_key
+      - name: event_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_event')
+                field: event_key
+      - name: nature_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_nature')
+                field: nature_key
+      - name: source_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_source')
+                field: source_key
+      - name: body_part_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_body_part')
+                field: body_part_key
+      - name: event_date
+        tests:
+          - not_null
+      - name: severity_score
+        description: "Hospitalized + 2*amputated + 3*eye loss (see severity_score macro)."
+  - name: mart_safety_metrics
+    description: "Monthly safety KPIs by state and NAICS sector. See the model header for metric definitions."
+    columns:
+      - name: month
+        tests:
+          - not_null
+      - name: incident_count
+        tests:
+          - not_null
+      - name: hospitalization_rate
+        description: "Share of incidents with >= 1 person hospitalized."
+      - name: amputation_rate
+        description: "Share of incidents with >= 1 amputation."
+      - name: inspection_rate
+        description: "Share of incidents followed by an OSHA inspection."

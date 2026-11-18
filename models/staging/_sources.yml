@@ -1,0 +1,36 @@
+version: 2
+
+sources:
+  - name: osha
+    description: >-
+      U.S. Occupational Safety and Health Administration (OSHA) Severe Injury
+      Reports (SIR): employer-reported amputations, in-patient hospitalizations,
+      and eye losses, Jan 1, 2015 - Nov 30, 2025. Public data, downloaded from
+      the Severe Injury Dashboard at https://www.osha.gov/severe-injury-reports
+      (direct file: January2015toNovember2025.zip, 105,996 records). The repo
+      commits a deterministic 1,500-row stratified sample
+      (scripts/download_data.py reproduces it from the official ZIP).
+    tables:
+      - name: sir
+        description: "Raw severe injury reports, one row per reported incident."
+        meta:
+          external_location: "data/raw/osha_sir.csv"
+        columns:
+          - name: ID
+            description: "OSHA report ID. 5 duplicate IDs exist in the full file; staging deduplicates on this key."
+          - name: EventDate
+            description: "Date of the incident, MM/DD/YYYY."
+          - name: Employer
+            description: "Employer name as reported."
+          - name: Primary NAICS
+            description: "6-digit NAICS industry code of the establishment."
+          - name: Hospitalized
+            description: "Number of people hospitalized in the incident (stored as a decimal string, e.g. '1.00')."
+          - name: Amputation
+            description: "Number of amputations in the incident (blank in 7 full-file rows)."
+          - name: Loss of Eye
+            description: "Number of eye losses in the incident (blank in 5 full-file rows)."
+          - name: Inspection
+            description: "OSHA inspection number when an inspection followed; blank for most reports."
+          - name: FederalState
+            description: "1 = federal OSHA jurisdiction, 0 = state-plan state."

@@ -1,0 +1,88 @@
+version: 2
+
+semantic_models:
+  - name: incidents
+    description: "One row per OSHA severe injury report (fact_incidents)."
+    model: ref('fact_incidents')
+    entities:
+      - name: incident
+        type: primary
+        expr: incident_key
+      - name: employer
+        type: foreign
+        expr: employer_key
+    measures:
+      - name: total_incidents
+        description: "Count of severe injury reports."
+        expr: 1
+        agg: sum
+        agg_time_dimension: event_date
+      - name: people_hospitalized
+        description: "Total people hospitalized."
+        expr: people_hospitalized
+        agg: sum
+        agg_time_dimension: event_date
+      - name: people_amputated
+        description: "Total amputations."
+        expr: people_amputated
+        agg: sum
+        agg_time_dimension: event_date
+      - name: people_eye_loss
+        description: "Total eye losses."
+        expr: people_eye_loss
+        agg: sum
+        agg_time_dimension: event_date
+      - name: incidents_with_hospitalization
+        description: "Incidents with at least one person hospitalized."
+        expr: is_hospitalized
+        agg: sum
+        agg_time_dimension: event_date
+      - name: incidents_with_amputation
+        description: "Incidents with at least one amputation."
+        expr: is_amputation
+        agg: sum
+        agg_time_dimension: event_date
+    dimensions:
+      - name: event_date
+        type: time
+        expr: event_date
+        type_params:
+          time_granularity: day
+      - name: state
+        type: categorical
+        expr: state
+      - name: naics_sector
+        type: categorical
+        expr: naics_sector
+      - name: is_federal
+        type: categorical
+        expr: is_federal
+
+metrics:
+  - name: total_incidents
+    description: "Count of severe injury reports."
+    type: simple
+    type_params:
+      measure: total_incidents
+  - name: incidents_with_hospitalization
+    description: "Incidents with at least one person hospitalized."
+    type: simple
+    type_params:
+      measure: incidents_with_hospitalization
+  - name: incidents_with_amputation
+    description: "Incidents with at least one amputation."
+    type: simple
+    type_params:
+      measure: incidents_with_amputation
+  - name: hospitalization_rate
+    description: "Share of incidents with at least one person hospitalized."
+    type: ratio
+    type_params:
+      numerator: incidents_with_hospitalization
+      denominator: total_incidents
+  - name: amputation_rate
+    description: "Share of incidents with at least one amputation."
+    type: ratio
+    type_params:
+      numerator: incidents_with_amputation
+      denominator: total_incidents
